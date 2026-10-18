@@ -129,7 +129,7 @@ void jjsasm_print_token_vector(vector_t *vec){
     }
 }
 
-jjsasm_instr_e jjsasm_a_to_instr_e(const char *str){
+jjsasm_instr_e jjsasm_a_to_instr_e(char *str){
     if (strcmp(str, "NOP") == 0) return JJSASM_INSTR_NOP;
     if (strcmp(str, "MOV") == 0) return JJSASM_INSTR_MOV;
     if (strcmp(str, "ADD") == 0) return JJSASM_INSTR_ADD;
@@ -142,20 +142,27 @@ jjsasm_instr_e jjsasm_a_to_instr_e(const char *str){
     if (strcmp(str, "SKL") == 0) return JJSASM_INSTR_SKL;
     return JJSASM_INSTR_BAD;
 }
-jjsasm_instr_e jjsasm_a_to_instr_e_N(const char *str){
-    if (strncmp(str, "NOP ", 4) == 0) return JJSASM_INSTR_NOP;
-    if (strncmp(str, "MOV ", 4) == 0) return JJSASM_INSTR_MOV;
-    if (strncmp(str, "ADD ", 4) == 0) return JJSASM_INSTR_ADD;
-    if (strncmp(str, "SUB ", 4) == 0) return JJSASM_INSTR_SUB;
-    if (strncmp(str, "CMP ", 4) == 0) return JJSASM_INSTR_CMP;
-    if (strncmp(str, "JMP ", 4) == 0) return JJSASM_INSTR_JMP;
-    if (strncmp(str, "JE ", 3) == 0)  return JJSASM_INSTR_JE;
-    if (strncmp(str, "JL ", 3) == 0)  return JJSASM_INSTR_JL;
-    if (strncmp(str, "JG ", 3) == 0)  return JJSASM_INSTR_JG;
-    if (strncmp(str, "SKL ", 4) == 0) return JJSASM_INSTR_SKL;
+jjsasm_instr_e jjsasm_a_to_instr_e_N(char *str){
+    int ws = 0;
+    while (strchr(JJSASM_STR_WHITESPACE, str[ws]) == NULL && str[ws] != '\0')
+        ws++;
+
+    // i know this looks like total shit but im tryna account for
+    // NOP literally taking zero arguments and possibly ending in a null char before whitespace due to strtok
+    // Honestly i have GOT to get rid of NOP this is being annoying asf
+    if (strncmp(str, "NOP ", ws) == 0 && ws >= 3) return JJSASM_INSTR_NOP;
+    if (strncmp(str, "MOV ", ws) == 0 && ws >= 3) return JJSASM_INSTR_MOV;
+    if (strncmp(str, "ADD ", ws) == 0 && ws >= 3) return JJSASM_INSTR_ADD;
+    if (strncmp(str, "SUB ", ws) == 0 && ws >= 3) return JJSASM_INSTR_SUB;
+    if (strncmp(str, "CMP ", ws) == 0 && ws >= 3) return JJSASM_INSTR_CMP;
+    if (strncmp(str, "JMP ", ws) == 0 && ws >= 3) return JJSASM_INSTR_JMP;
+    if (strncmp(str, "JE ", ws) == 0  && ws >= 2)  return JJSASM_INSTR_JE;
+    if (strncmp(str, "JL ", ws) == 0  && ws >= 2)  return JJSASM_INSTR_JL;
+    if (strncmp(str, "JG ", ws) == 0  && ws >= 2)  return JJSASM_INSTR_JG;
+    if (strncmp(str, "SKL ", ws) == 0 && ws >= 3) return JJSASM_INSTR_SKL;
     return JJSASM_INSTR_BAD;
 }
-jjsasm_type_e jjsasm_parsenum(const char *str){
+jjsasm_type_e jjsasm_parsenum(char *str){
     int i = 0;
     int dec_used = 0;
 
@@ -165,13 +172,19 @@ jjsasm_type_e jjsasm_parsenum(const char *str){
             dec_used = 1;
         }
         else if ('0' <= str[i] && str[i] <= '9'){
-            continue;
+            // pass
         }
         else {
             return JJSASM_TYPE_UNKNOWN;
             // wont add exponent support, maybe if i build a higher-level compiler into JJSASM?
         }
+        i++;
     }
+
+    if (dec_used == 0)
+        return JJSASM_TYPE_INTEGER;
+    else
+        return JJSASM_TYPE_DECIMAL;
 }
 vector_t *jjsasm_tokenize(char *str){
     if (str == NULL) {
@@ -186,9 +199,13 @@ vector_t *jjsasm_tokenize(char *str){
     vector_t *vec = vector_new(sizeof(jjsasm_token_t), 64);
 
     while (str_token != NULL){
+        // Skip all whitespace at start of line early
+        while (strchr(JJSASM_STR_WHITESPACE, *str_token) != NULL)
+            str_token++;
+
         // Declare our token for later!!!
         jjsasm_token_t token_t;
-        size_t len = strlen(str); // literally used like once lmao
+        size_t len = strlen(str_token); // literally used like once lmao
 
         if (str_token[0] == '/' && str_token[1] == '/'){
             token_t.token_e = JJSASM_TOKEN_COMMENT;
@@ -235,20 +252,40 @@ vector_t *jjsasm_tokenize(char *str){
             str_token++;
 
             // Parse string of argument as a jjsasm_type_e with accompanying data
-
             jjsasm_type_e type_e = JJSASM_TYPE_UNKNOWN;
             uint64_t data;
             size_t end = strlen(str_token)-1; // Index of last char in arg
-            if (str_token[0] == JJSASM_TAG_CHAR)
+
+            int quote_i = 1; // if a string is found, quote_i will refer to the end quotation mark for proper string storage
+            if (str_token[0] == JJSASM_TAG_CHAR){
+                if (str_token[1] == '\0'){
+                    perror("Tokenize encountered malformed tag");
+                    goto TOKENIZE_FAILURE;
+                }
                 type_e = JJSASM_TYPE_TAG;
-            else if (str_token[0] == '\"' && str_token[end] == '\"'){
+            }
+            else if (str_token[0] == '\"'){
+                // See int quote_i above
+                while (str_token[quote_i] != '\"'){
+                    if (str_token[quote_i] == '\0'){
+                        perror("Tokenize encountered malformed string");
+                        goto TOKENIZE_FAILURE;
+                    }
+                    quote_i++;
+                }
+
                 type_e = JJSASM_TYPE_STRING;
                 // Remember to add handling for string quotation marks
             }
 
-            if (type_e != JJSASM_TYPE_UNKNOWN)
-                // This block is for already handled tags and strings
-                data = (uintptr_t)str_token;
+            if (type_e == JJSASM_TYPE_TAG)
+                data = (uintptr_t)(str_token + sizeof(char));
+            else if (type_e == JJSASM_TYPE_STRING){
+                char *curr_str = malloc(sizeof(char) * (quote_i + 1));
+                strncpy(curr_str, str_token + sizeof(char), quote_i);
+                curr_str[quote_i-1] = '\0';
+                data = (uintptr_t)curr_str;
+            }
             else {
                 type_e = jjsasm_parsenum(str_token);
                 switch (type_e) {
@@ -258,10 +295,8 @@ vector_t *jjsasm_tokenize(char *str){
                     case JJSASM_TYPE_DECIMAL:
                         data = d_readas_u64(atof(str_token));
                         break;
-                    case JJSASM_TYPE_UNKNOWN:
-                        perror("Unknown type encountered while parsing argument");
                     default:
-                        perror("what the fuck dude");
+                        perror("Tokenize encountered unknown argument while parsing");
                         goto TOKENIZE_FAILURE;
                 }
             }
@@ -285,15 +320,14 @@ vector_t *jjsasm_tokenize(char *str){
         // May have jumped to here from handling of
         // comments and labels above the instruction stuff
         NEXT_TOKEN: // goto
-        jjsasm_print_token_t(token_t);
-        putchar('\n');
         vector_push(vec, (void *)&token_t);
         str_token = strtok(NULL, JJSASM_STR_LINEBREAK);
     }
 
-
+    return vec;
 
     TOKENIZE_FAILURE: // goto
+    jjsasm_print_token_vector(vec);
     for (int i = 0; i < vec->size; i++){
         jjsasm_token_t *token_t = (jjsasm_token_t *)vector_get(vec, i);
         if (token_t->token_e == JJSASM_TOKEN_INSTRUCTION){

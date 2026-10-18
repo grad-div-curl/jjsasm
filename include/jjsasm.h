@@ -39,25 +39,25 @@ Functions
     Conversion to jjsasm types
         size_t jjsasm_argc_of(jjsasm_instr_e instruction);
     String conversion and prints
-        const char *jjsasm_type_e_to_a(jjsasm_type_e type_e);
-        const char *jjsasm_instr_e_to_a(jjsasm_instr_e instr_e);
-        const char *jjsasm_token_e_to_a(jjsasm_token_e token_e);
+        char *jjsasm_type_e_to_a(jjsasm_type_e type_e);
+        char *jjsasm_instr_e_to_a(jjsasm_instr_e instr_e);
+        char *jjsasm_token_e_to_a(jjsasm_token_e token_e);
 
         void jjsasm_print_arg_t(jjsasm_arg_t arg_t);
         void jjsasm_print_instr_t(jjsasm_instr_t instr_t);
         void jjasm_print_token_t(jjsasm_token_t token_t);
         void jjsasm_print_token_vector(vector_t *vec);
     Parsing strings
-        jjsasm_instr_e jjsasm_a_to_instr_e(const char *str);
-        jjsasm_instr_e jjsasm_a_to_instr_e_N(const char *str);
-        jjsasm_type_e jjsasm_parsenum(const char *str);
+        jjsasm_instr_e jjsasm_a_to_instr_e(char *str);
+        jjsasm_instr_e jjsasm_a_to_instr_e_N(char *str);
+        jjsasm_type_e jjsasm_parsenum(char *str);
         vector_t *jjsasm_tokenize(char *str);
 
 */
 
 #define JJSASM_TAG_CHAR '#'
 #define JJSASM_STR_WHITESPACE "\n\r\t "
-#define JJSASM_STR_LINEBREAK "\n\r"
+#define JJSASM_STR_LINEBREAK "\n\r\t" // yes i know tab is in linebreak but it makes life so much easier for programming in this
 
 static const int jjsasm_argc[] = {0, 2, 2, 2, 2, 1, 1, 1, 1, 1};
 static const char *jjsasm_type_strs[] = {"UNKNOWN", "INTEGER", "DECIMAL", "STRING", "TAG", "BAD"};
@@ -132,9 +132,9 @@ void jjsasm_print_instr_t(jjsasm_instr_t instr_t);
 void jjsasm_print_token_t(jjsasm_token_t token_t);
 void jjsasm_print_token_vector(vector_t *vec);
 
-jjsasm_instr_e jjsasm_a_to_instr_e(const char *str);
-jjsasm_instr_e jjsasm_a_to_instr_e_N(const char *str);
-jjsasm_type_e jjsasm_parsenum(const char *str);
+jjsasm_instr_e jjsasm_a_to_instr_e(char *str);
+jjsasm_instr_e jjsasm_a_to_instr_e_N(char *str);
+jjsasm_type_e jjsasm_parsenum(char *str);
 vector_t *jjsasm_tokenize(char *str); // vector_t elements are of type jjsasm_token_t
 
 #endif // JJSASM_H

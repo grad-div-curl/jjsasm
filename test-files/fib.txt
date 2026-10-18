@@ -1,0 +1,27 @@
+
+
+// Set fibonacci tags
+MOV #num1 0
+MOV #num2 1
+MOV #num3 1
+
+// Create counter variable
+MOV #i 10
+
+FIB_LOOP:
+    // Create temporary tag and set it to num2 + num3
+    MOV #tmp #num2
+    ADD #tmp #num3
+
+// Push new fibonacci numbers forward
+MOV #num1 #num2
+MOV #num2 #num3
+MOV #num3 #tmp
+
+// Decrement counter and repeat if not greater than 0
+SUB #i 1
+CMP #i 0
+JG "FIB_LOOP"
+
+// end of fibonacci, no output implemented yet
+
