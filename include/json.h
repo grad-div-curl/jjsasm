@@ -1,29 +1,39 @@
 /*
     I'm too lazy to use another person's json library so ima just make my own barebones one
     I also lwk don't even need to convert from string to JSON but it's a fun activity
+    Don't expect this to be fast it's not for actual bigass databases
 */
 
 #ifndef JSON_H
 #define JSON_H
 
+#ifndef JSON_TAB_SIZE
+#define JSON_TAB_SIZE 4
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include "vector.h"
 
 /*
+
+Defines
+    JSON_TAB_SIZE
+Types
+    Enums
+        json_bool
+        json_type
     Types
-        Enums
-            json_bool
-            json_type
-        Types
-            json_value
-            json_kv_pair
-            json_object_data
-            json_array_data
-    Functions
-        json_value json_parse(char *str);
-        char *json_tostring(json_value start);
+        json_value
+        json_kv_pair
+        json_object_data
+        json_array_data
+Functions
+    json_value json_parse(char *str);
+    char *json_tostring(json_value start);
+
 */
 
 typedef enum json_bool {
@@ -68,7 +78,21 @@ typedef struct json_array_data {
     json_value *data;
 } json_array_data;
 
+/*
+    Parses a string into a JSON value
+
+    @param str String to be parsed
+    @return Parsed JSON value, or 
+*/
 json_value json_parse(char *str);
-char *json_tostring(json_value start);
+
+/*
+    Returns a string representing a JSON value
+
+    @param val JSON value to be parsed
+    @param indent Number of spaces to precede each line
+    @return String descr
+*/
+char *json_tostring(json_value val, unsigned int indent);
 
 #endif // JSON_H
