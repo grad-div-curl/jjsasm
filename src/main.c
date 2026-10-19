@@ -22,22 +22,11 @@ int main(int argc, char **argv){
         fclose(fp);
     }
 
-    /* */
     vector_t *vec = jjsasm_tokenize(str);
     if (vec == NULL)
         printf("null");
     else
         jjsasm_print_token_vector(vec);
-    // */
-    
-    /*
-    printf("\n\n");
-    int i = 0;
-    while (str[i] != '\0'){
-        printf("(%.2x %c) ", str[i], str[i]);
-        i++;
-    }
-    // */
     
     return EXIT_SUCCESS;
 }
