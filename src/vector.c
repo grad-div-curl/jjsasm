@@ -1,7 +1,3 @@
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-
 #include "vector.h"
 
 vector_t *vector_new(size_t element_size, size_t capacity){

@@ -1,11 +1,5 @@
 // Code by graddivcurl
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include "vector.h"
-
 #include "jjsasm.h"
 
 /*
