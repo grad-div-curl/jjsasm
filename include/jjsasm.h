@@ -31,11 +31,6 @@ Variables
     static const size_t jjsasm_argc_size
     static const size_t jjsasm_instr_strs_size
 Functions
-    Helpers
-        static uint64_t ll_read_u64(long long ll);
-        static uint64_t d_read_u64(double d);
-        static long long u64_read_ll(uint64_t u64);
-        static double u64_read_d(uint64_t u64);
     Conversion to jjsasm types
         size_t jjsasm_argc_of(jjsasm_instr_e instruction);
     String conversion and prints
