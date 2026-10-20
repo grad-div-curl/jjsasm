@@ -1,7 +1,7 @@
 /*
     I'm too lazy to use another person's json library so ima just make my own barebones one
     I also lwk don't even need to convert from string to JSON but it's a fun activity
-    Don't expect this to be fast it's not for actual bigass databases
+    Don't expect this to be fast it's not for actual bigass databases it's for jjsasm scripts
 */
 
 #ifndef JSON_H
@@ -87,7 +87,7 @@ typedef struct json_array_data {
 json_value json_parse(char *str);
 
 /*
-    Returns a string representing a JSON value
+    Returns a string representing a JSON value, includes indentation
 
     @param val JSON value to be parsed
     @param indent Number of spaces to precede each line

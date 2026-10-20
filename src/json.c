@@ -45,11 +45,12 @@ static char *putspcs(char *src, unsigned int n){
 
 char *json_tostring(json_value val, unsigned int indent){
     switch (val.type){
-        case JSON_TYPE_NULL: return putspcs("NULL", indent);
+        case JSON_TYPE_NULL: return putspcs("null", indent);
         case JSON_TYPE_BOOLEAN:
             if (val.data == JSON_TRUE) return putspcs("true", indent);
             if (val.data == JSON_FALSE) return putspcs("false", indent);
-            return "?";
+            perror("json_tostring() expected valid enum json_bool (JSON_TRUE or JSON_FALSE), got non-json_bool");
+            return NULL;
         case JSON_TYPE_NUMBER:
             char *tmp = malloc(16 * sizeof(char));
             sprintf(tmp, "%lf", u64_readas_d(val.data));
@@ -65,7 +66,10 @@ char *json_tostring(json_value val, unsigned int indent){
             vector_push(chvec, putspcs("[\n", indent));
             for (int i = 0; i < arr.size; i++){
                 vector_push(chvec, putspcs(json_tostring(arr.data[i], JSON_TAB_SIZE), indent));
+                char *str = malloc(sizeof(char) * 64);
+                printf("%s\n", *(char *)vector_pop(chvec, str));
                 if (i != arr.size - 1) vector_push(chvec, ",\n");
+                free(str);
             }
             vector_push(chvec, "\n");
             vector_push(chvec, putspcs("]", indent));
@@ -76,11 +80,12 @@ char *json_tostring(json_value val, unsigned int indent){
             }
 
             char *str = malloc(total_len + 1);
+            char *ptr = str;
             for (int i = 0; i < chvec->size; i++){
                 char *ch_i = (char *)vector_get(chvec, i);
                 int len = strlen(ch_i);
-                strncpy(str, ch_i, len);
-                str += len;
+                strncpy(ptr, ch_i, len);
+                ptr += len;
             }
             str[total_len + 1] = '\0';
             vector_free(chvec);

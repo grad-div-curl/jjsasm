@@ -25,12 +25,19 @@ void vector_push(vector_t *vec, void *element){
     vec->size++;
 }
 
-// returns out if successful, NULL if failed
+// returns out if an element exists, NULL if vec->size == 0
 void *vector_pop(vector_t *vec, void *out){
     if (vec->size == 0) return NULL;
     vec->size--;
     // data[size] now points to the former last element
     memcpy(out, vec->data + vec->size * vec->element_size, vec->element_size);
+    return out;
+}
+
+// returns out if an element exists, NULL if vec->size == 0
+void *vector_poll(vector_t *vec, void *out){
+    if (vec->size == 0) return NULL;
+    memcpy(out, vec->data + (vec->size - 1) * vec->element_size, vec->element_size);
     return out;
 }
 
