@@ -68,12 +68,29 @@ char *json_tostring(json_value val, unsigned int indent){
             json_array_data arr = *(json_array_data *)val.data;
             vector_t *chvec = vector_new(sizeof(char), 64);
             
-            vector_push(chvec, "[\n");
+            vector_push(chvec, putspcs("[\n", indent));
             for (int i = 0; i < arr.size; i++){
                 vector_push(chvec, putspcs(json_tostring(arr.data[i], JSON_TAB_SIZE), indent));
                 if (i != arr.size - 1) vector_push(chvec, ",\n");
             }
+            vector_push(chvec, "\n");
+            vector_push(chvec, putspcs("]", indent));
 
+            int total_len = 0;
+            for (int i = 0; i < chvec->size; i++){
+                total_len += strlen(vector_get(chvec, i));
+            }
+
+            char *str = malloc(total_len + 1);
+            for (int i = 0; i < chvec->size; i++){
+                char *ch_i = (char *)vector_get(chvec, i);
+                int len = strlen(ch_i);
+                strncpy(str, ch_i, len);
+                str += len;
+            }
+            str[total_len + 1] = '\0';
+            vector_free(chvec);
+            return str;
         case JSON_TYPE_OBJECT:
             // unimplemented
     }
