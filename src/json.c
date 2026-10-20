@@ -25,14 +25,8 @@ Functions
 
 // evil floating point bit level hacking 2: electric boogaloo
 
-static uint64_t ll_readas_u64(long long ll){
-    return *(uint64_t *)&ll;
-}
 static uint64_t d_readas_u64(double d){
     return *(uint64_t *)&d;
-}
-static long long u64_readas_ll(uint64_t u64){
-    return *(long long *)&u64;
 }
 static double u64_readas_d(uint64_t u64){
     return *(double *)&u64;
