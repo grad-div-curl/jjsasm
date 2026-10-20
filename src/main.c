@@ -4,8 +4,10 @@
 #include <string.h>
 #include "vector.h"
 #include "jjsasm.h"
+#include "json.h"
 
 int main(int argc, char **argv){
+    /*
     char *str = calloc(2048, sizeof(str));
     char str_ph[] = "ADD 1 2\nCMP 3 4";
 
@@ -27,6 +29,9 @@ int main(int argc, char **argv){
         printf("null");
     else
         jjsasm_print_token_vector(vec);
+    // */
+
+    
     
     return EXIT_SUCCESS;
 }
