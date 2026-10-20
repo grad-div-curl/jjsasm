@@ -17,7 +17,7 @@ Functions
             static uint64_t d_read_u64(double d);
             static long long u64_read_ll(uint64_t u64);
             static double u64_read_d(uint64_t u64);
-            static inline void putspcs(unsigned int n);
+            static char *putspcs(unsigned int n);
     json_value json_parse(char *str);
     char *json_tostring(json_value start);
 
@@ -45,10 +45,10 @@ static char *putspcs(char *src, unsigned int n){
 
 char *json_tostring(json_value val, unsigned int indent){
     switch (val.type){
-        case JSON_TYPE_NULL: return "NULL";
+        case JSON_TYPE_NULL: return putspcs("NULL", indent);
         case JSON_TYPE_BOOLEAN:
-            if (val.data == JSON_TRUE) return "true";
-            if (val.data == JSON_FALSE) return "false";
+            if (val.data == JSON_TRUE) return putspcs("true", indent);
+            if (val.data == JSON_FALSE) return putspcs("false", indent);
             return "?";
         case JSON_TYPE_NUMBER:
             char *tmp = malloc(16 * sizeof(char));
