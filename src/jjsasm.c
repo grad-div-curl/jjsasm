@@ -329,7 +329,7 @@ vector_t *jjsasm_tokenize(char *str){
             if (argv != NULL) free(argv);
         }
     }
-    vector_free(vec, 0); // made a whole ass free_all flag just to not use it here
+    vector_free(vec);
     return NULL;
 }
 // end

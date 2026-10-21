@@ -91,14 +91,7 @@ void *vector_remove(vector_t *vec, void *out, uint64_t i){
     return out;
 }
 
-void vector_free(vector_t *vec, int free_all){
-    if (free_all == 1){
-        for (int i = 0; i < vec->size; i++){
-            void *v = vector_get(vec, i);
-            if (v != NULL) free(v);
-        }
-    }
-
+void vector_free(vector_t *vec){
     free(vec->data);
     free(vec);
 }

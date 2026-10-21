@@ -96,8 +96,7 @@ void *vector_remove(vector_t *vec, void *out, uint64_t i);
     Frees `vec` from memory using `free()`.
 
     @param `vec` The vector to free.
-    @param `free_all` If `free_all == 1`, individually attempts to call `free()` on each non-`NULL` element.
 */
-void vector_free(vector_t *vec, int free_all);
+void vector_free(vector_t *vec);
 
 #endif
