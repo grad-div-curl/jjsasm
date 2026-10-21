@@ -33,6 +33,7 @@ static double u64_readas_d(uint64_t u64){
 }
 
 // Returns an identical string with n spaces at the front
+// Returned string is allocated to heap, must be freed
 static char *putspcs(char *src, unsigned int n){
     int len = strlen(src);
     char *dst = calloc(len + n + 1, sizeof(char));
@@ -61,35 +62,23 @@ char *json_tostring(json_value val, unsigned int indent){
             return putspcs((char *)val.data, indent);
         case JSON_TYPE_ARRAY:
             json_array_data arr = *(json_array_data *)val.data;
-            vector_t *chvec = vector_new(sizeof(char), 64);
-            
-            vector_push(chvec, putspcs("[\n", indent));
+
+            vector_t *strvec = vector_new(sizeof(char *), 64);
+            vector_push(strvec, putspcs("[\n", indent));
             for (int i = 0; i < arr.size; i++){
-                vector_push(chvec, putspcs(json_tostring(arr.data[i], JSON_TAB_SIZE), indent));
-                char *str = malloc(sizeof(char) * 64);
-                printf("%s\n", *(char *)vector_pop(chvec, str));
-                if (i != arr.size - 1) vector_push(chvec, ",\n");
-                free(str);
+                
+                vector_push(strvec, json_tostring(arr.data[i], JSON_TAB_SIZE));
+                if (i != arr.size - 1) vector_push(strvec, ",\n");
             }
-            vector_push(chvec, "\n");
-            vector_push(chvec, putspcs("]", indent));
+            vector_push(strvec, "\n");
+            vector_push(strvec, putspcs("]", indent));
 
             int total_len = 0;
-            for (int i = 0; i < chvec->size; i++){
-                total_len += strlen(vector_get(chvec, i));
+            for (int i = 0; i < strvec->size; i++){
+                total_len += strlen((char *)vector_get(strvec, i));
             }
 
-            char *str = malloc(total_len + 1);
-            char *ptr = str;
-            for (int i = 0; i < chvec->size; i++){
-                char *ch_i = (char *)vector_get(chvec, i);
-                int len = strlen(ch_i);
-                strncpy(ptr, ch_i, len);
-                ptr += len;
-            }
-            str[total_len + 1] = '\0';
-            vector_free(chvec);
-            return str;
+
         case JSON_TYPE_OBJECT:
             // unimplemented
     }
