@@ -88,6 +88,7 @@ json_value json_parse(char *str);
 
 /*
     Returns a string representing a JSON value, includes indentation
+    The returned string is allocated to the heap and must be freed using free()
 
     @param val JSON value to be parsed
     @param indent Number of spaces to precede each line
