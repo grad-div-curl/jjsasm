@@ -7,8 +7,11 @@
 #ifndef JSON_H
 #define JSON_H
 
+#ifndef JSON_RECURSE_MAX
+#define JSON_RECURSE_MAX 100
+#endif
 #ifndef JSON_TAB_SIZE
-#define JSON_TAB_SIZE 4
+#define JSON_TAB_SIZE 2
 #endif
 
 #include <stdio.h>
@@ -20,6 +23,7 @@
 /*
 
 Defines
+    JSON_RECURSE_MAX
     JSON_TAB_SIZE
 Types
     Enums
@@ -92,8 +96,9 @@ json_value json_parse(char *str);
 
     @param val JSON value to be parsed
     @param indent Number of spaces to precede each line
+    @param first_indent Whether to indent the first line
     @return String descr
 */
-char *json_tostring(json_value val, unsigned int indent);
+char *json_tostring(json_value val, unsigned int indent, int first_indent);
 
 #endif // JSON_H
