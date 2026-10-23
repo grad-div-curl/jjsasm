@@ -24,7 +24,7 @@ vector_t *vector_new(size_t element_size, size_t capacity);
 
 /*
     Returns a pointer to the `i`th element of `vec`, or `NULL` if failed.
-    The returned pointer can be cast to the intended type of the vector.
+    The returned pointer can be cast to the intended type of the vector's pointer and dereferenced.
 
     @param `vec` A pointer to the `vector_t` to search in.
     @param `i` The index of the desired element.
