@@ -36,21 +36,20 @@ int main(int argc, char **argv){
     // */
 
     json_value one = {JSON_TYPE_NUMBER, d_readas_u64(1)};
+    json_value vtrue = {JSON_TYPE_BOOLEAN, JSON_TRUE};
+    json_value hello = {JSON_TYPE_STRING, (uintptr_t)"Hello, World!"};
+    json_value vnull = {JSON_TYPE_NULL, 0};
+    
     json_value two = {JSON_TYPE_NUMBER, d_readas_u64(2)};
-    json_value arr[] = {one, two};
-    json_array_data arr_data = {2, arr};
-    json_value arr_val = {JSON_TYPE_ARRAY, (uint64_t)&arr_data};
-    printf("%s\n", json_tostring(one, 0));
-    printf("%s\n", json_tostring(two, 0));
+    json_value nums[] = {one, two};
+    json_array_data nums_data = {2, nums};
+    json_value nums_arr = {JSON_TYPE_ARRAY, (uintptr_t)&nums_data};
 
-    char *str = json_tostring(arr_val, 0);
-    printf("%s\n\n", str);
-
-    if (str == NULL) printf("NULL");
-    else while (*str != '\0'){
-        printf("%x ", *str);
-        str++;
-    }
+    json_value vals[] = {one, vtrue, hello, vnull, nums_arr};
+    json_array_data arr_data = {sizeof(vals) / sizeof(json_value), vals};
+    json_value arr = {JSON_TYPE_ARRAY, (uintptr_t)&arr_data};
+    
+    printf(json_tostring(arr, 0, 0));
     
     return EXIT_SUCCESS;
 }
