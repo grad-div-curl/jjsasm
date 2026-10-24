@@ -10,6 +10,7 @@ add_executable(jjsasm
     src/vector.c
     src/jjsasm.c
     src/json.c
+    src/helpers.c
 )
 
 target_include_directories(jjsasm PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
