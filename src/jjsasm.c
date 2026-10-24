@@ -23,23 +23,6 @@ Parsing strings
 
 */
 
-
-// evil floating point bit level hacking
-// what the fuck?
-
-static uint64_t ll_readas_u64(long long ll){
-    return *(uint64_t *)&ll;
-}
-static uint64_t d_readas_u64(double d){
-    return *(uint64_t *)&d;
-}
-static long long u64_readas_ll(uint64_t u64){
-    return *(long long *)&u64;
-}
-static double u64_readas_d(uint64_t u64){
-    return *(double *)&u64;
-}
-
 size_t jjsasm_argc_of(jjsasm_instr_e instr_e){
     if (instr_e >= jjsasm_argc_size) return 0;
     return jjsasm_argc[(int)instr_e];
@@ -65,10 +48,10 @@ void jjsasm_print_arg_t(jjsasm_arg_t arg_t){
             printf("%.16x", (uintptr_t)arg_t.data);
             break;
         case JJSASM_TYPE_INTEGER:
-            printf("%ld", u64_readas_ll(arg_t.data));
+            printf("%ld", read_u64_as_z64(arg_t.data));
             break;
         case JJSASM_TYPE_DECIMAL:
-            printf("%lf", u64_readas_d(arg_t.data));
+            printf("%lf", read_u64_as_d(arg_t.data));
             break;
         case JJSASM_TYPE_STRING:
             printf("\"%s\"", (char *)arg_t.data);
@@ -150,9 +133,9 @@ jjsasm_instr_e jjsasm_a_to_instr_e_N(char *str){
     if (strncmp(str, "SUB ", ws) == 0 && ws >= 3) return JJSASM_INSTR_SUB;
     if (strncmp(str, "CMP ", ws) == 0 && ws >= 3) return JJSASM_INSTR_CMP;
     if (strncmp(str, "JMP ", ws) == 0 && ws >= 3) return JJSASM_INSTR_JMP;
-    if (strncmp(str, "JE ", ws) == 0  && ws >= 2)  return JJSASM_INSTR_JE;
-    if (strncmp(str, "JL ", ws) == 0  && ws >= 2)  return JJSASM_INSTR_JL;
-    if (strncmp(str, "JG ", ws) == 0  && ws >= 2)  return JJSASM_INSTR_JG;
+    if (strncmp(str, "JE ", ws) == 0  && ws >= 2) return JJSASM_INSTR_JE;
+    if (strncmp(str, "JL ", ws) == 0  && ws >= 2) return JJSASM_INSTR_JL;
+    if (strncmp(str, "JG ", ws) == 0  && ws >= 2) return JJSASM_INSTR_JG;
     if (strncmp(str, "SKL ", ws) == 0 && ws >= 3) return JJSASM_INSTR_SKL;
     return JJSASM_INSTR_BAD;
 }
@@ -284,10 +267,10 @@ vector_t *jjsasm_tokenize(char *str){
                 type_e = jjsasm_parsenum(str_token);
                 switch (type_e) {
                     case JJSASM_TYPE_INTEGER:
-                        data = ll_readas_u64(atoll(str_token));
+                        data = read_z64_as_u64(atoll(str_token));
                         break;
                     case JJSASM_TYPE_DECIMAL:
-                        data = d_readas_u64(atof(str_token));
+                        data = read_d_as_u64(atof(str_token));
                         break;
                     default:
                         perror("Tokenize encountered unknown argument while parsing");

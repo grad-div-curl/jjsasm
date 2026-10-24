@@ -39,67 +39,6 @@ static char *rbrac = "]";
 static char *commanl = ",\n";
 static char *nl = "\n";
 
-// evil floating point bit level hacking 2: electric boogaloo
-
-static uint64_t d_readas_u64(double d){
-    return *(uint64_t *)&d;
-}
-static double u64_readas_d(uint64_t u64){
-    return *(double *)&u64;
-}
-
-// Returns an identical string with n spaces at the front
-// Returned string is allocated to heap, must be freed
-static char *putspcs(char *src, unsigned int n){
-    size_t len = strlen(src);
-    char *dst = malloc(len + n + 1);
-    for (int i = 0; i < n; i++){
-        dst[i] = ' ';
-    }
-    strncpy(dst + n*sizeof(char), src, len);
-    return dst;
-}
-
-// Returns the string in quotes
-// Returned string is allocated to heap, must be freed
-static char *enquote(char *src){
-    size_t len = strlen(src);
-    char *dst = malloc(len + 3);
-    dst[0] = dst[len + 1] = '\"';
-    dst[len + 2] = '\0';
-    strncpy(dst, src, len);
-    return dst;
-}
-
-/*
-    Returns the concatenation of all items in a string vector.
-    Returned string is allocated to heap, must be freed
-
-    @param `str_vec` A `vector_t` containing elements of type `char *`.
-
-    @return The concatenation of all strings in `str_vec`. Must be freed using free() once done.
-*/
-static char *concat(vector_t *str_vec){
-    size_t total_len = 0;
-    for (int i = 0; i < str_vec->size; i++){
-        char *str = *(char **)vector_get(str_vec, i);
-        total_len += strlen(str);
-    }
-
-    char *cnct = malloc(total_len + 1);
-    char *ptr = cnct;
-
-    for (int i = 0; i < str_vec->size; i++){
-        char *str = *(char **)vector_get(str_vec, i);
-        size_t len = strlen(str);
-        strncpy(ptr, str, len);
-        ptr += len;
-    }
-
-    cnct[total_len] = '\0';
-    return cnct;
-}
-
 char *json_tostring(json_value val, unsigned int indent, int first_indent){
     recurse++;
     if (recurse > JSON_RECURSE_MAX) {
@@ -122,8 +61,8 @@ char *json_tostring(json_value val, unsigned int indent, int first_indent){
                 ret = (first_indent ? putspcs("null", indent) : "null");
             break;
         case JSON_TYPE_NUMBER:
-            char *tmp = malloc(16);
-            sprintf(tmp, "%lf", u64_readas_d(val.data));
+            char *tmp = calloc(sizeof(char), 16);
+            sprintf(tmp, "%lf", read_u64_as_d(val.data));
             if (first_indent) {
                 ret = putspcs(tmp, indent);
                 free(tmp);

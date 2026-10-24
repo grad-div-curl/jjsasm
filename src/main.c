@@ -5,10 +5,7 @@
 #include "vector.h"
 #include "jjsasm.h"
 #include "json.h"
-
-static uint64_t d_readas_u64(double d) {
-    return *(uint64_t *)&d;
-}
+#include "helpers.h"
 
 int main(int argc, char **argv){
     /*
@@ -35,12 +32,12 @@ int main(int argc, char **argv){
         jjsasm_print_token_vector(vec);
     // */
 
-    json_value one = {JSON_TYPE_NUMBER, d_readas_u64(1)};
+    json_value one = {JSON_TYPE_NUMBER, read_d_as_u64(1)};
     json_value vtrue = {JSON_TYPE_BOOLEAN, JSON_TRUE};
     json_value hello = {JSON_TYPE_STRING, (uintptr_t)"Hello, World!"};
     json_value vnull = {JSON_TYPE_NULL, 0};
     
-    json_value two = {JSON_TYPE_NUMBER, d_readas_u64(2)};
+    json_value two = {JSON_TYPE_NUMBER, read_d_as_u64(2)};
     json_value nums[] = {one, two};
     json_array_data nums_data = {2, nums};
     json_value nums_arr = {JSON_TYPE_ARRAY, (uintptr_t)&nums_data};
@@ -49,7 +46,7 @@ int main(int argc, char **argv){
     json_array_data arr_data = {sizeof(vals) / sizeof(json_value), vals};
     json_value arr = {JSON_TYPE_ARRAY, (uintptr_t)&arr_data};
     
-    printf(json_tostring(arr, 0, 0));
+    printf("%lld", read_d_as_u64(2.0));
     
     return EXIT_SUCCESS;
 }

@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "vector.h"
+#include "helpers.h"
 
 /*
 
