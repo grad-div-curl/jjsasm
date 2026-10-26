@@ -38,6 +38,7 @@ char *putspcs(char *str, unsigned int n){
         spcstr[i] = ' ';
     }
     memcpy(spcstr + n, str, len);
+    spcstr[len + n] = '\0';
     return spcstr;
 }
 
