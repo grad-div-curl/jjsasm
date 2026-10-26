@@ -41,11 +41,27 @@ Functions
 
 */
 
+/*
+    Boolean values for JSON.
+
+    `JSON_FALSE`: False, or `0`.
+    `JSON_TRUE`:  True, or `1`.
+*/
 typedef enum json_bool {
     JSON_FALSE = 0,
     JSON_TRUE = 1
 } json_bool;
 
+/*
+    Types used in JSON.
+
+    `JSON_TYPE_NULL`:    Specifies no data.
+    `JSON_TYPE_NUMBER`:  A `double` or similar 64-bit floating-point number.
+    `JSON_TYPE_STRING`:  A `char *` pointing to a null-terminated string of text.
+    `JSON_TYPE_BOOLEAN`: A `json_bool` value, either `JSON_FALSE` or `JSON _TRUE`.
+    `JSON_TYPE_ARRAY`:   A `json_array_data *` value.
+    `JSON_TYPE_OBJECT`:  A `json_object_data *` value.
+*/
 typedef enum json_type {
     JSON_TYPE_NULL,
     JSON_TYPE_NUMBER,
@@ -56,10 +72,19 @@ typedef enum json_type {
 } json_type;
 
 /*
-    Describes a number, string, boolean, etc. just anything
-    `uint64_t data` contains whatever value is stored READ (not cast or converted, READ) as a `uint64_t`
-    Store data in variable `V` as `*(uint64_t *)&V`
+    Determines indentation for json_tostring().
+    
+    JSON_INDENT_NONE   : No indentation or newlines.
+    JSON_INDENT_NOFIRST: Indent, but not the first line.
+    JSON_INDENT_ALL    : Indent.
 */
+typedef enum json_indent_flag {
+    JSON_INDENT_NONE,
+    JSON_INDENT_NOFIRST,
+    JSON_INDENT_ALL
+} json_indent_flag;
+
+// Describes a JSON value using its type and stored data.
 typedef struct json_value {
     json_type type;
     uint64_t data;
@@ -92,14 +117,13 @@ typedef struct json_array_data {
 json_value json_parse(char *str);
 
 /*
-    Returns a string representing a JSON value, includes indentation
+    Returns a string representing a JSON value, no indentation
     The returned string is allocated to the heap and must be freed using free()
 
     @param val JSON value to be parsed
-    @param indent Number of spaces to precede each line
-    @param first_indent Whether to indent the first line
-    @return String descr
+    
+    @return Parsed JSON
 */
-char *json_tostring(json_value val, unsigned int indent, int first_indent);
+char *json_tostring(json_value val);
 
 #endif // JSON_H

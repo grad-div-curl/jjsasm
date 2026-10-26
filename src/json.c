@@ -34,75 +34,54 @@ Functions
 */
 static int recurse = 0;
 
-static char *lbrac = "[\n";
+static char *lbrac = "[";
 static char *rbrac = "]";
-static char *commanl = ",\n";
-static char *nl = "\n";
+static char *comma = ",";
 
-char *json_tostring(json_value val, unsigned int indent, int first_indent){
+char *json_tostring(json_value val){
     recurse++;
     if (recurse > JSON_RECURSE_MAX) {
         perror("Recurse maximum reached!");
         recurse--;
-        return putspcs("null", indent);
+        return "null";
     }
 
     char *ret;
     switch (val.type){
         case JSON_TYPE_NULL:
-            ret = (first_indent ? putspcs("null", indent) : "null");
+            ret = "null";
             break;
         case JSON_TYPE_BOOLEAN:
             if (val.data == JSON_TRUE)
-                ret = (first_indent ? putspcs("true", indent) : "true");
+                ret = "true";
             else if (val.data == JSON_FALSE)
-                ret = (first_indent ? putspcs("false", indent) : "false");
+                ret = "false";
             else
-                ret = (first_indent ? putspcs("null", indent) : "null");
+                ret = "null";
             break;
         case JSON_TYPE_NUMBER:
-            char *tmp = calloc(sizeof(char), 16);
-            sprintf(tmp, "%lf", read_u64_as_d(val.data));
-            if (first_indent) {
-                ret = putspcs(tmp, indent);
-                free(tmp);
-            }
-            else ret = tmp;
+            ret = calloc(sizeof(char), 16);
+            sprintf(ret, "%lf", read_u64_as_d(val.data));
             break;
         case JSON_TYPE_STRING:
-            char *qstr = enquote((char *)val.data);
-            if (first_indent) {
-                ret = putspcs(qstr, indent);
-                free(qstr);
-            }
-            else ret = qstr;
+            ret = enquote((char *)val.data);
             break;
         case JSON_TYPE_ARRAY:
             json_array_data arr = *(json_array_data *)val.data;
 
             vector_t *strvec = vector_new(sizeof(char *), 64);
             char **free_later = malloc(sizeof(char *) * arr.size); // strings put here are freed later
-            char *indented_str = putspcs("", indent);
             
-            if (first_indent) vector_push(strvec, &indented_str);
             vector_push(strvec, &lbrac);
-
             for (int i = 0; i < arr.size; i++){
-                char *str = json_tostring(arr.data[i], JSON_TAB_SIZE, 1);
-                vector_push(strvec, &indented_str);
+                char *str = json_tostring(arr.data[i]);
                 vector_push(strvec, &str);
-
                 free_later[i] = str;
-                if (i != arr.size - 1) vector_push(strvec, &commanl);
+                if (i != arr.size - 1) vector_push(strvec, &comma);
             }
-            vector_push(strvec, &nl);
-            vector_push(strvec, &indented_str);
             vector_push(strvec, &rbrac);
-            
 
             ret = concat(strvec);
-
-            free(indented_str);
             for (int i = 0; i < arr.size; i++){
                 free(free_later[i]);
             }
