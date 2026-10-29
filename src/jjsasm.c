@@ -44,27 +44,27 @@ void jjsasm_print_arg_t(jjsasm_arg_t arg_t){
     printf("(%s : ", jjsasm_type_e_to_a(arg_t.type_e));
 
     switch (arg_t.type_e){
-        case JJSASM_TYPE_UNKNOWN:
-            printf("%.16x", (uintptr_t)arg_t.data);
-            break;
-        case JJSASM_TYPE_INTEGER:
-            printf("%ld", read_u64_as_z64(arg_t.data));
-            break;
-        case JJSASM_TYPE_DECIMAL:
-            printf("%lf", read_u64_as_d(arg_t.data));
-            break;
-        case JJSASM_TYPE_STRING:
-            printf("\"%s\"", (char *)arg_t.data);
-            break;
-        case JJSASM_TYPE_TAG:
-            printf("%c%s", JJSASM_TAG_CHAR, (char *)arg_t.data);
-            break;
-        case JJSASM_TYPE_BAD:
-            printf("%.16x", (uintptr_t)arg_t.data);
-            break;
-        default:
-            printf("what the fuck?");
-            break;
+    case JJSASM_TYPE_UNKNOWN:
+        printf("%.16x", (uintptr_t)arg_t.data);
+        break;
+    case JJSASM_TYPE_INTEGER:
+        printf("%ld", read_u64_as_z64(arg_t.data));
+        break;
+    case JJSASM_TYPE_DECIMAL:
+        printf("%lf", read_u64_as_d(arg_t.data));
+        break;
+    case JJSASM_TYPE_STRING:
+        printf("\"%s\"", (char *)arg_t.data);
+        break;
+    case JJSASM_TYPE_TAG:
+        printf("%c%s", JJSASM_TAG_CHAR, (char *)arg_t.data);
+        break;
+    case JJSASM_TYPE_BAD:
+        printf("%.16x", (uintptr_t)arg_t.data);
+        break;
+    default:
+        printf("what the fuck?");
+        break;
     }
 
     putchar(')');
@@ -80,21 +80,21 @@ void jjsasm_print_token_t(jjsasm_token_t token_t){
     printf("[%s : ", jjsasm_token_e_to_a(token_t.token_e));
 
     switch (token_t.token_e){
-        case JJSASM_TOKEN_UNKNOWN:
-            printf("%.16x", (uintptr_t)token_t.data);
-            break;
-        case JJSASM_TOKEN_INSTRUCTION:
-            jjsasm_print_instr_t(*(jjsasm_instr_t *)token_t.data);
-            break;
-        case JJSASM_TOKEN_COMMENT:
-            printf((char *)token_t.data);
-            break;
-        case JJSASM_TOKEN_LABEL:
-            printf((char *)token_t.data);
-            break;
-        case JJSASM_TOKEN_BAD:
-            printf("%.16x", (uintptr_t)token_t.data);
-            break;
+    case JJSASM_TOKEN_UNKNOWN:
+        printf("%.16x", (uintptr_t)token_t.data);
+        break;
+    case JJSASM_TOKEN_INSTRUCTION:
+        jjsasm_print_instr_t(*(jjsasm_instr_t *)token_t.data);
+        break;
+    case JJSASM_TOKEN_COMMENT:
+        printf((char *)token_t.data);
+        break;
+    case JJSASM_TOKEN_LABEL:
+        printf((char *)token_t.data);
+        break;
+    case JJSASM_TOKEN_BAD:
+        printf("%.16x", (uintptr_t)token_t.data);
+        break;
     }
 
     putchar(']');
@@ -266,15 +266,15 @@ vector_t *jjsasm_tokenize(char *str){
             else {
                 type_e = jjsasm_parsenum(str_token);
                 switch (type_e) {
-                    case JJSASM_TYPE_INTEGER:
-                        data = read_z64_as_u64(atoll(str_token));
-                        break;
-                    case JJSASM_TYPE_DECIMAL:
-                        data = read_d_as_u64(atof(str_token));
-                        break;
-                    default:
-                        perror("Tokenize encountered unknown argument while parsing");
-                        goto TOKENIZE_FAILURE;
+                case JJSASM_TYPE_INTEGER:
+                    data = read_z64_as_u64(atoll(str_token));
+                    break;
+                case JJSASM_TYPE_DECIMAL:
+                    data = read_d_as_u64(atof(str_token));
+                    break;
+                default:
+                    perror("Tokenize encountered unknown argument while parsing");
+                    goto TOKENIZE_FAILURE;
                 }
             }
 

@@ -112,11 +112,6 @@ typedef struct jjsasm_token_t {
     void *data;
 } jjsasm_token_t;
 
-static uint64_t ll_readas_u64(long long ll);
-static uint64_t d_readas_u64(double d);
-static long long u64_readas_ll(uint64_t u64);
-static double u64_readas_d(uint64_t u64);
-
 size_t jjsasm_argc_of(jjsasm_instr_e instr_e);
 
 const char *jjsasm_type_e_to_a(jjsasm_type_e type_e);
