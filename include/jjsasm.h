@@ -9,6 +9,7 @@
 #include <string.h>
 #include "vector.h"
 #include "helpers.h"
+#include "json.h"
 
 /*
 
@@ -48,16 +49,15 @@ Functions
         jjsasm_instr_e jjsasm_a_to_instr_e_N(char *str);
         jjsasm_type_e jjsasm_parsenum(char *str);
         vector_t *jjsasm_tokenize(char *str);
-
+    JSON
+        json_value *jjsasm_token_to_json(vector_t  *tokens); 
 */
 
-#define JJSASM_TAG_CHAR '#'
-#define JJSASM_STR_WHITESPACE "\n\r\t "
-#define JJSASM_STR_LINEBREAK "\n\r\t" // yes i know tab is in linebreak but it makes life so much easier for programming in this
+#define JJSASM_TAG_CHAR '$'
 
 static const int jjsasm_argc[] = {0, 2, 2, 2, 2, 1, 1, 1, 1, 1};
 static const char *jjsasm_type_strs[] = {"UNKNOWN", "INTEGER", "DECIMAL", "STRING", "TAG", "BAD"};
-static const char *jjsasm_instr_strs[] = {"NOP", "MOV", "ADD", "SUB", "CMP", "JMP", "JE", "JL", "JG", "SKL", "BAD"};
+static const char *jjsasm_instr_strs[] = {"NOP", "MOV", "ADD", "SUB", "CMP", "JMP", "JE", "JL", "JG", "LOOP", "SKL", "BAD"};
 static const char *jjsasm_token_strs[] = {"UNKNOWN", "INSTRUCTION", "COMMENT", "LABEL", "BAD"};
 
 static const size_t jjsasm_argc_size = sizeof(jjsasm_argc) / sizeof(int); // resolved at compile-time! like the others
@@ -84,6 +84,7 @@ typedef enum jjsasm_instr_e {
     JJSASM_INSTR_JE,
     JJSASM_INSTR_JL,
     JJSASM_INSTR_JG,
+    JJSASM_INSTR_LOOP,
     JJSASM_INSTR_SKL,
     JJSASM_INSTR_BAD
 } jjsasm_instr_e;
@@ -127,5 +128,6 @@ jjsasm_instr_e jjsasm_a_to_instr_e(char *str);
 jjsasm_instr_e jjsasm_a_to_instr_e_N(char *str);
 jjsasm_type_e jjsasm_parsenum(char *str);
 vector_t *jjsasm_tokenize(char *str); // vector_t elements are of type jjsasm_token_t
+json_value *jjsasm_token_to_json(vector_t  *tokens); // vector_t elements are of type jjsasm_token_t;
 
 #endif // JJSASM_H
