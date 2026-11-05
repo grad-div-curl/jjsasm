@@ -1,0 +1,3 @@
+C:/Users/ob071/Downloads/Programs/jjsasm/build/CMakeFiles/jjsasm.dir
+C:/Users/ob071/Downloads/Programs/jjsasm/build/CMakeFiles/edit_cache.dir
+C:/Users/ob071/Downloads/Programs/jjsasm/build/CMakeFiles/rebuild_cache.dir

@@ -53,12 +53,13 @@ Functions
         json_value *jjsasm_token_to_json(vector_t  *tokens); 
 */
 
+#define JJSASM_HEADER_CHAR '#'
 #define JJSASM_TAG_CHAR '$'
 
 static const int jjsasm_argc[] = {0, 2, 2, 2, 2, 1, 1, 1, 1, 1};
 static const char *jjsasm_type_strs[] = {"UNKNOWN", "INTEGER", "DECIMAL", "STRING", "TAG", "BAD"};
 static const char *jjsasm_instr_strs[] = {"NOP", "MOV", "ADD", "SUB", "CMP", "JMP", "JE", "JL", "JG", "LOOP", "SKL", "BAD"};
-static const char *jjsasm_token_strs[] = {"UNKNOWN", "INSTRUCTION", "COMMENT", "LABEL", "BAD"};
+static const char *jjsasm_token_strs[] = {"UNKNOWN", "INSTRUCTION", "COMMENT", "LABEL", "HEADER", "BAD"};
 
 static const size_t jjsasm_argc_size = sizeof(jjsasm_argc) / sizeof(int); // resolved at compile-time! like the others
 static const size_t jjsasm_type_strs_size = sizeof(jjsasm_type_strs) / sizeof(char *);
@@ -94,6 +95,7 @@ typedef enum jjsasm_token_e {
     JJSASM_TOKEN_INSTRUCTION,
     JJSASM_TOKEN_COMMENT,
     JJSASM_TOKEN_LABEL,
+    JJSASM_TOKEN_HEADER,
     JJSASM_TOKEN_BAD
 } jjsasm_token_e;
 
@@ -112,6 +114,13 @@ typedef struct jjsasm_token_t {
     jjsasm_token_e token_e;
     void *data;
 } jjsasm_token_t;
+
+// straight ripped from the json_kv_pair in json.h
+// just uses a char* for val instead of json.h's json_val
+typedef struct jjsasm_header_t {
+    char *key;
+    char *val;
+} jjsasm_header_t;
 
 size_t jjsasm_argc_of(jjsasm_instr_e instr_e);
 

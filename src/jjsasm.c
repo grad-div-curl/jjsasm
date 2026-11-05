@@ -4,24 +4,33 @@
 
 /*
 
-Helpers
-    static uint64_t ll_read_u64(long long ll);
-    static uint64_t d_read_u64(double d);
-    static long long u64_read_ll(uint64_t u64);
-    static double u64_read_d(uint64_t u64);
-Conversion to jjsasm types
-    size_t jjsasm_argc_of(jjsasm_instr_e instruction);
-String conversion and prints
-    char *jjsasm_instr_e_to_a(jjsasm_instr_e instr_e);
-    char *jjsasm_type_e_to_a(jjsasm_type_e type_e);
-    void jjsasm_print_arg_t(jjsasm_arg_t arg_t);
-    void jjsasm_print_instr_t(jjsasm_instr_t instr_t);
-Parsing strings
-    jjsasm_instr_e jjsasm_a_to_instr_e(char *str);
-    jjsasm_type_e jjsasm_parsenum(char *str);
-    vector_t *jjsasm_tokenize(char *str);
-
+Variables
+    static char *JJSASM_STR_WHITESPACE
+    static char *JJSASM_STR_LINEBREAK
+Functions
+    Helpers
+        static uint64_t ll_read_u64(long long ll);
+        static uint64_t d_read_u64(double d);
+        static long long u64_read_ll(uint64_t u64);
+        static double u64_read_d(uint64_t u64);
+    Conversion to jjsasm types
+        size_t jjsasm_argc_of(jjsasm_instr_e instruction);
+    String conversion and prints
+        char *jjsasm_instr_e_to_a(jjsasm_instr_e instr_e);
+        char *jjsasm_type_e_to_a(jjsasm_type_e type_e);
+        void jjsasm_print_arg_t(jjsasm_arg_t arg_t);
+        void jjsasm_print_instr_t(jjsasm_instr_t instr_t);
+    Parsing strings
+        jjsasm_instr_e jjsasm_a_to_instr_e(char *str);
+        jjsasm_type_e jjsasm_parsenum(char *str);
+        vector_t *jjsasm_tokenize(char *str);
+    JSON
+        json_value jjsasm_token_to_json(vector_t  *tokens); 
 */
+
+static char *whitespace = "\n\r\t ";
+static char *linebreak = "\n\r\t";
+static char *branch = "Branch";
 
 size_t jjsasm_argc_of(jjsasm_instr_e instr_e){
     if (instr_e >= jjsasm_argc_size) return 0;
@@ -63,6 +72,7 @@ void jjsasm_print_arg_t(jjsasm_arg_t arg_t){
         printf("%.16x", (uintptr_t)arg_t.data);
         break;
     default:
+        // what the fuck?
         printf("what the fuck?");
         break;
     }
@@ -87,10 +97,12 @@ void jjsasm_print_token_t(jjsasm_token_t token_t){
         jjsasm_print_instr_t(*(jjsasm_instr_t *)token_t.data);
         break;
     case JJSASM_TOKEN_COMMENT:
-        printf((char *)token_t.data);
-        break;
     case JJSASM_TOKEN_LABEL:
         printf((char *)token_t.data);
+        break;
+    case JJSASM_TOKEN_HEADER:
+        jjsasm_header_t *header = (jjsasm_header_t *)token_t.data;
+        printf("(%s=\"%s\")", header->key, header->val);
         break;
     case JJSASM_TOKEN_BAD:
         printf("%.16x", (uintptr_t)token_t.data);
@@ -107,43 +119,45 @@ void jjsasm_print_token_vector(vector_t *vec){
 }
 
 jjsasm_instr_e jjsasm_a_to_instr_e(char *str){
-    if (strcmp(str, "NOP") == 0) return JJSASM_INSTR_NOP;
-    if (strcmp(str, "MOV") == 0) return JJSASM_INSTR_MOV;
-    if (strcmp(str, "ADD") == 0) return JJSASM_INSTR_ADD;
-    if (strcmp(str, "SUB") == 0) return JJSASM_INSTR_SUB;
-    if (strcmp(str, "CMP") == 0) return JJSASM_INSTR_CMP;
-    if (strcmp(str, "JMP") == 0) return JJSASM_INSTR_JMP;
-    if (strcmp(str, "JE") == 0)  return JJSASM_INSTR_JE;
-    if (strcmp(str, "JL") == 0)  return JJSASM_INSTR_JL;
-    if (strcmp(str, "JG") == 0)  return JJSASM_INSTR_JG;
-    if (strcmp(str, "SKL") == 0) return JJSASM_INSTR_SKL;
+    if (strcmp(str, "NOP") == 0)  return JJSASM_INSTR_NOP;
+    if (strcmp(str, "MOV") == 0)  return JJSASM_INSTR_MOV;
+    if (strcmp(str, "ADD") == 0)  return JJSASM_INSTR_ADD;
+    if (strcmp(str, "SUB") == 0)  return JJSASM_INSTR_SUB;
+    if (strcmp(str, "CMP") == 0)  return JJSASM_INSTR_CMP;
+    if (strcmp(str, "JMP") == 0)  return JJSASM_INSTR_JMP;
+    if (strcmp(str, "JE") == 0)   return JJSASM_INSTR_JE;
+    if (strcmp(str, "JL") == 0)   return JJSASM_INSTR_JL;
+    if (strcmp(str, "JG") == 0)   return JJSASM_INSTR_JG;
+    if (strcmp(str, "LOOP") == 0) return JJSASM_INSTR_LOOP;
+    if (strcmp(str, "SKL") == 0)  return JJSASM_INSTR_SKL;
     return JJSASM_INSTR_BAD;
 }
 jjsasm_instr_e jjsasm_a_to_instr_e_N(char *str){
     int ws = 0;
-    while (strchr(JJSASM_STR_WHITESPACE, str[ws]) == NULL && str[ws] != '\0')
+    while (strchr(whitespace, str[ws]) == NULL && str[ws] != '\0')
         ws++;
 
     // i know this looks like total shit but im tryna account for
     // NOP literally taking zero arguments and possibly ending in a null char before whitespace due to strtok
     // Honestly i have GOT to get rid of NOP this is being annoying asf
-    if (strncmp(str, "NOP ", ws) == 0 && ws >= 3) return JJSASM_INSTR_NOP;
-    if (strncmp(str, "MOV ", ws) == 0 && ws >= 3) return JJSASM_INSTR_MOV;
-    if (strncmp(str, "ADD ", ws) == 0 && ws >= 3) return JJSASM_INSTR_ADD;
-    if (strncmp(str, "SUB ", ws) == 0 && ws >= 3) return JJSASM_INSTR_SUB;
-    if (strncmp(str, "CMP ", ws) == 0 && ws >= 3) return JJSASM_INSTR_CMP;
-    if (strncmp(str, "JMP ", ws) == 0 && ws >= 3) return JJSASM_INSTR_JMP;
-    if (strncmp(str, "JE ", ws) == 0  && ws >= 2) return JJSASM_INSTR_JE;
-    if (strncmp(str, "JL ", ws) == 0  && ws >= 2) return JJSASM_INSTR_JL;
-    if (strncmp(str, "JG ", ws) == 0  && ws >= 2) return JJSASM_INSTR_JG;
-    if (strncmp(str, "SKL ", ws) == 0 && ws >= 3) return JJSASM_INSTR_SKL;
+    if (strncmp(str, "NOP ", ws) == 0 && ws >= 3)   return JJSASM_INSTR_NOP;
+    if (strncmp(str, "MOV ", ws) == 0 && ws >= 3)   return JJSASM_INSTR_MOV;
+    if (strncmp(str, "ADD ", ws) == 0 && ws >= 3)   return JJSASM_INSTR_ADD;
+    if (strncmp(str, "SUB ", ws) == 0 && ws >= 3)   return JJSASM_INSTR_SUB;
+    if (strncmp(str, "CMP ", ws) == 0 && ws >= 3)   return JJSASM_INSTR_CMP;
+    if (strncmp(str, "JMP ", ws) == 0 && ws >= 3)   return JJSASM_INSTR_JMP;
+    if (strncmp(str, "JE ", ws) == 0  && ws >= 2)   return JJSASM_INSTR_JE;
+    if (strncmp(str, "JL ", ws) == 0  && ws >= 2)   return JJSASM_INSTR_JL;
+    if (strncmp(str, "JG ", ws) == 0  && ws >= 2)   return JJSASM_INSTR_JG;
+    if (strncmp(str, "LOOP ", ws) == 0  && ws >= 4) return JJSASM_INSTR_LOOP;
+    if (strncmp(str, "SKL ", ws) == 0 && ws >= 3)   return JJSASM_INSTR_SKL;
     return JJSASM_INSTR_BAD;
 }
 jjsasm_type_e jjsasm_parsenum(char *str){
     int i = 0;
     int dec_used = 0;
 
-    while (strchr(JJSASM_STR_WHITESPACE, str[i]) == NULL){
+    while (strchr(whitespace, str[i]) == NULL){
         if (str[i] == '.'){
             if (dec_used == 1) return JJSASM_TYPE_UNKNOWN;
             dec_used = 1;
@@ -171,20 +185,33 @@ vector_t *jjsasm_tokenize(char *str){
 
 
     // Initialize char *str_token for tracking lines in const char *str using strtok
-    char *str_token  = strtok(str, JJSASM_STR_LINEBREAK);
+    char *str_token  = strtok(str, linebreak);
     // vec handles elements of type jjsasm_token_t
     vector_t *vec = vector_new(sizeof(jjsasm_token_t), 64);
 
     while (str_token != NULL){
         // Skip all whitespace at start of line early
-        while (strchr(JJSASM_STR_WHITESPACE, *str_token) != NULL)
+        while (strchr(whitespace, *str_token) != NULL)
             str_token++;
 
         // Declare our token for later!!!
         jjsasm_token_t token_t;
         size_t len = strlen(str_token); // literally used like once lmao
 
-        if (str_token[0] == '/' && str_token[1] == '/'){
+
+        if (str_token[0] == JJSASM_HEADER_CHAR){
+            jjsasm_header_t *header = malloc(sizeof(jjsasm_header_t));
+            header->key = str_token + 1;
+            while (strchr(whitespace, *str_token) == NULL) str_token++;
+            *str_token = '\0';
+            header->val = ++str_token;
+        
+            token_t.token_e = JJSASM_TOKEN_HEADER;
+            token_t.data = (void *)header;
+
+            goto NEXT_TOKEN;
+        }
+        else if (str_token[0] == '/' && str_token[1] == '/'){
             token_t.token_e = JJSASM_TOKEN_COMMENT;
             token_t.data = &str_token[2];
             
@@ -218,7 +245,7 @@ vector_t *jjsasm_tokenize(char *str){
         // Iterate through each expected argument
         for (int i = 0; i < argc; i++){
             // Find next argument
-            while (strchr(JJSASM_STR_WHITESPACE, *str_token) == NULL){
+            while (strchr(whitespace, *str_token) == NULL){
                 str_token++;
                 // If a null is encountered, it probably expected more arguments
                 if (*str_token == '\0'){
@@ -298,7 +325,7 @@ vector_t *jjsasm_tokenize(char *str){
         // comments and labels above the instruction stuff
         NEXT_TOKEN: // goto
         vector_push(vec, (void *)&token_t);
-        str_token = strtok(NULL, JJSASM_STR_LINEBREAK);
+        str_token = strtok(NULL, linebreak);
     }
 
     return vec;
@@ -315,4 +342,10 @@ vector_t *jjsasm_tokenize(char *str){
     vector_free(vec);
     return NULL;
 }
-// end
+
+json_value *jjsasm_token_to_json(vector_t *tokens){
+    json_value *ret = malloc(sizeof(json_value));
+    ret->type = JSON_TYPE_ARRAY;
+    
+
+}
