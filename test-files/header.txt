@@ -1,0 +1,7 @@
+// This file exists to test headers as I'm implementing them.
+
+#NAME header
+#COOLDOWN 5
+#TOOLTIP this will do something...
+
+// Another comment to make sure it's parsing right.
